@@ -168,7 +168,7 @@ async def cmd_approveall(client: Client, msg: Message):
                 f"{style.kv('ETA', f'<code>{eta_str}</code>')}"
             )
             markup = InlineKeyboardMarkup([
-                [InlineKeyboardButton(style.btn("Cancel Queue"), callback_data=f"cancel_queue:{job.chat_id}")]
+                [InlineKeyboardButton(style.btn("Cancel Queue"), callback_data=f"pending:cancel_queue:{job.chat_id}")]
             ])
         elif job.status == "completed":
             text = (
@@ -260,8 +260,8 @@ async def cmd_queue(client: Client, msg: Message):
             f"• {style.kv('Processed', processed_html)}"
         )
         markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(style.btn("Refresh"), callback_data=f"queue_refresh:{target_chat_id}")],
-            [InlineKeyboardButton(style.btn("Cancel Job"), callback_data=f"cancel_queue:{target_chat_id}")],
+            [InlineKeyboardButton(style.btn("Refresh"), callback_data=f"pending:queue_refresh:{target_chat_id}")],
+            [InlineKeyboardButton(style.btn("Cancel Job"), callback_data=f"pending:cancel_queue:{target_chat_id}")],
         ])
         await msg.reply_text(text, reply_markup=markup)
         return
@@ -291,7 +291,7 @@ async def cmd_queue(client: Client, msg: Message):
 
 
 # ─── Callbacks ──────────────────────────────────────────────────────────────
-@Client.on_callback_query(filters.regex(r"^cancel_queue:(-?\d+)$"))
+@Client.on_callback_query(filters.regex(r"^pending:cancel_queue:(-?\d+)$"))
 async def cb_cancel_queue(client: Client, q: CallbackQuery):
     chat_id = int(q.matches[0].group(1))
     has_perm = await can_manage_chat(q.from_user.id, chat_id, client)
@@ -306,7 +306,7 @@ async def cb_cancel_queue(client: Client, q: CallbackQuery):
         await q.answer("Job already completed or not active.", show_alert=False)
 
 
-@Client.on_callback_query(filters.regex(r"^queue_refresh:(-?\d+)$"))
+@Client.on_callback_query(filters.regex(r"^pending:queue_refresh:(-?\d+)$"))
 async def cb_queue_refresh(client: Client, q: CallbackQuery):
     chat_id = int(q.matches[0].group(1))
     status = queue_manager.get_status(chat_id)
@@ -336,8 +336,8 @@ async def cb_queue_refresh(client: Client, q: CallbackQuery):
         f"• <b>Processed:</b> <b>{status['processed']:,}</b>"
     )
     markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔄 Refresh", callback_data=f"queue_refresh:{chat_id}")],
-        [InlineKeyboardButton("🛑 Cancel Job", callback_data=f"cancel_queue:{chat_id}")],
+        [InlineKeyboardButton("🔄 Refresh", callback_data=f"pending:queue_refresh:{chat_id}")],
+        [InlineKeyboardButton("🛑 Cancel Job", callback_data=f"pending:cancel_queue:{chat_id}")],
     ])
     try:
         await q.message.edit_text(text, reply_markup=markup)

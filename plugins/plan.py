@@ -114,8 +114,8 @@ async def cmd_plan(client: Client, msg: Message):
     text = await _render_plan_text(uid)
     markup = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("🔄 Refresh Metrics", callback_data="plan_refresh"),
-            InlineKeyboardButton("⭐ Upgrade Plan", callback_data="plan_upgrade"),
+            InlineKeyboardButton("🔄 Refresh Metrics", callback_data="plan:refresh"),
+            InlineKeyboardButton("⭐ Upgrade Plan", callback_data="plan:upgrade"),
         ],
         [InlineKeyboardButton("🔙 Main Menu", callback_data="main")],
     ])
@@ -123,14 +123,14 @@ async def cmd_plan(client: Client, msg: Message):
 
 
 # ─── Refresh Callback Handler (Edits Message in Place) ──────────────────────
-@Client.on_callback_query(filters.regex("^plan_refresh$"))
+@Client.on_callback_query(filters.regex("^plan:refresh$"))
 async def cb_plan_refresh(client: Client, q: CallbackQuery):
     uid = q.from_user.id
     text = await _render_plan_text(uid)
     markup = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("🔄 Refresh Metrics", callback_data="plan_refresh"),
-            InlineKeyboardButton("⭐ Upgrade Plan", callback_data="plan_upgrade"),
+            InlineKeyboardButton("🔄 Refresh Metrics", callback_data="plan:refresh"),
+            InlineKeyboardButton("⭐ Upgrade Plan", callback_data="plan:upgrade"),
         ],
         [InlineKeyboardButton("🔙 Main Menu", callback_data="main")],
     ])
@@ -142,7 +142,7 @@ async def cb_plan_refresh(client: Client, q: CallbackQuery):
         pass
 
 
-@Client.on_callback_query(filters.regex("^plan_upgrade$"))
+@Client.on_callback_query(filters.regex("^plan:upgrade$"))
 async def cb_plan_upgrade(client: Client, q: CallbackQuery):
     text = (
         f"{style.h('⭐ Upgrade Plan Tiers')}\n\n"
@@ -153,7 +153,7 @@ async def cb_plan_upgrade(client: Client, q: CallbackQuery):
     )
     markup = InlineKeyboardMarkup([
         [InlineKeyboardButton("💬 Contact Owner to Upgrade", url=config.owner_contact_url())],
-        [InlineKeyboardButton("🔙 Back to Plan", callback_data="plan_refresh")],
+        [InlineKeyboardButton("🔙 Back to Plan", callback_data="plan:refresh")],
     ])
     await ui.edit(q.message, text, reply_markup=markup)
     await q.answer()
